@@ -1,0 +1,9 @@
+node_modules
+.next
+*.log
+responsive-*.png
+nitaaq-map-*.png
+final-check.png
+whatsapp-button-check.png
+.env
+.env*.local

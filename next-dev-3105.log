@@ -1,0 +1,32 @@
+
+> nitaaq-map-google-maps-qr-qr@1.0.0 dev
+> next dev --port 3105
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3105
+- Network:       http://10.116.180.241:3105
+✓ Ready in 1484ms
+
+○ Compiling / ...
+ GET / 200 in 243ms (next.js: 13ms, application-code: 230ms)
+ GET / 200 in 372ms (next.js: 17ms, application-code: 355ms)
+ GET / 200 in 330ms (next.js: 29ms, application-code: 301ms)
+ POST /api/trips 200 in 1518ms (next.js: 1473ms, application-code: 45ms)
+ GET / 200 in 170ms (next.js: 9ms, application-code: 161ms)
+ GET / 200 in 327ms (next.js: 12ms, application-code: 315ms)
+✓ Compiled in 381ms
+ POST /api/trips 200 in 102ms (next.js: 77ms, application-code: 25ms)
+ HEAD /trip/eyJ2IjoxLCJ1cmwiOiJodHRwczovL3d3dy5nb29nbGUuY29tL21hcHMvZGlyLz9hcGk9MSZkZXN0aW5hdGlvbj1SaXlhZGgiLCJpYXQiOjE3NzkxNDUxMjU2OTIsImV4cCI6MTc3OTE0NTQyNTY5Miwibm9uY2UiOiJ0MDV1YzRkalZsSHpMY0hYIn0.bIdPE3eWXfRIoCn6YciH7OJ3Ae9MKSQdYWpWq_RAXew 307 in 3.4s (next.js: 2.9s, application-code: 476ms)
+ POST /api/trips 200 in 12ms (next.js: 4ms, application-code: 8ms)
+✓ Compiled in 164ms
+ POST /api/trips 200 in 59ms (next.js: 47ms, application-code: 12ms)
+ HEAD /trip/eyJ2IjoxLCJ1cmwiOiJodHRwczovL3d3dy5nb29nbGUuY29tL21hcHMvZGlyLz9hcGk9MSZkZXN0aW5hdGlvbj1SaXlhZGgiLCJpYXQiOjE3NzkxNDUyMDkwODksImV4cCI6MTc3OTE0NTUwOTA4OSwibm9uY2UiOiJBOFBiakVTckJWOE1TTFU3In0.AT9UWQo7uTy4FzAcIvqeOqRIIdyx2r5adPKpQnw6MwE 307 in 536ms (next.js: 216ms, application-code: 320ms)
+ GET / 200 in 479ms (next.js: 148ms, application-code: 330ms)
+ GET / 200 in 342ms (next.js: 7ms, application-code: 335ms)
+ GET / 200 in 203ms (next.js: 8ms, application-code: 195ms)
+ POST /api/trips 200 in 24ms (next.js: 9ms, application-code: 15ms)
+ GET / 200 in 146ms (next.js: 5ms, application-code: 140ms)
+ POST /api/trips 200 in 25ms (next.js: 9ms, application-code: 16ms)
+✓ Compiled in 175ms
+ GET / 200 in 488ms (next.js: 323ms, application-code: 165ms)
+ GET / 200 in 432ms (next.js: 7ms, application-code: 425ms)
