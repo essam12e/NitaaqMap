@@ -1,4 +1,4 @@
-const CACHE_NAME = "nitaaq-map-v1";
+const CACHE_NAME = "nitaaq-map-v2";
 const STATIC_ASSETS = [
   "/",
   "/manifest.json",

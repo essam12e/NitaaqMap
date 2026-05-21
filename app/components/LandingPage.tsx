@@ -26,11 +26,8 @@ import {
   Navigation,
   Plus,
   QrCode,
-  Route,
-  ShieldCheck,
   Sparkles,
   Sun,
-  TimerReset,
   Zap,
 } from "lucide-react";
 import { isGoogleMapsUrl, normalizeGoogleMapsUrl } from "@/lib/maps-url";
@@ -255,6 +252,85 @@ function PrimaryLink({
     >
       {children}
     </a>
+  );
+}
+
+function MapVisual() {
+  const roads = [
+    "M0 88 C140 72 210 118 340 98 S510 40 700 62 S910 132 1120 88",
+    "M20 176 C180 154 270 198 420 176 S680 120 820 152 S1010 224 1180 172",
+    "M0 266 C170 230 320 270 470 246 S720 198 920 238 S1060 306 1200 250",
+    "M120 30 L250 360",
+    "M325 0 L530 360",
+    "M615 20 L520 360",
+    "M760 0 L930 360",
+    "M1020 0 L880 360",
+    "M60 330 L1140 30",
+    "M215 18 L1130 318",
+    "M0 118 L1180 118",
+    "M0 214 L1200 214",
+  ];
+  const pins = [
+    { x: 18, y: 64, delay: 0 },
+    { x: 38, y: 38, delay: 0.25 },
+    { x: 58, y: 72, delay: 0.45 },
+    { x: 76, y: 30, delay: 0.65 },
+    { x: 88, y: 62, delay: 0.85 },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      className="map-visual relative h-80 overflow-hidden"
+      aria-hidden="true"
+    >
+      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1200 360" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="roadGradient" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="currentColor" stopOpacity="0.15" />
+            <stop offset="52%" stopColor="currentColor" stopOpacity="0.72" />
+            <stop offset="100%" stopColor="currentColor" stopOpacity="0.18" />
+          </linearGradient>
+        </defs>
+        {roads.map((road, index) => (
+          <motion.path
+            key={road}
+            d={road}
+            fill="none"
+            stroke="url(#roadGradient)"
+            strokeWidth={index < 3 ? 8 : 3}
+            strokeLinecap="round"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 1.2, delay: index * 0.04, ease: "easeOut" }}
+          />
+        ))}
+      </svg>
+      {pins.map((pin) => (
+        <motion.div
+          key={`${pin.x}-${pin.y}`}
+          className="map-pin absolute"
+          style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
+          initial={{ opacity: 0, y: -18, scale: 0.75 }}
+          animate={{ opacity: 1, y: [0, -7, 0], scale: 1 }}
+          transition={{
+            opacity: { duration: 0.35, delay: pin.delay },
+            scale: { duration: 0.35, delay: pin.delay },
+            y: { duration: 2.4, repeat: Infinity, delay: pin.delay, ease: "easeInOut" },
+          }}
+        >
+          <MapPin className="h-12 w-12" />
+          <span className="absolute left-1/2 top-9 h-4 w-10 -translate-x-1/2 rounded-full bg-current opacity-20 blur-md" />
+        </motion.div>
+      ))}
+      <motion.div
+        className="absolute bottom-10 right-12 h-5 w-5 rounded-full bg-emerald-300 shadow-[0_0_34px_rgba(45,212,191,0.65)]"
+        animate={{ scale: [1, 1.65, 1], opacity: [0.75, 1, 0.75] }}
+        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </motion.div>
   );
 }
 
@@ -516,6 +592,7 @@ export function LandingPage() {
         activationRef={activationRef}
         onActivationInput={setActivationInput}
         onActivateCode={activateCode}
+        onThemeToggle={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
         onShowActivation={() => {
           setShowActivation(true);
           setTimeout(
@@ -524,6 +601,7 @@ export function LandingPage() {
           );
         }}
         showActivation={showActivation}
+        theme={theme}
       />
     );
   }
@@ -659,10 +737,6 @@ export function LandingPage() {
                 الصق رابط الرحلة وأنشئ الكود
               </h2>
             </div>
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/8 px-4 py-2 text-sm font-bold text-amber-100">
-              <ShieldCheck className="h-4 w-4" />
-              صالح لمدة 5 دقائق فقط
-            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="grid gap-4 xl:grid-cols-[1fr_auto]">
@@ -775,20 +849,6 @@ export function LandingPage() {
               </div>
 
               <div className="min-w-0 rounded-[2rem] border border-white/10 bg-white/[0.04] p-4 sm:p-7">
-                <div className="mb-5 rounded-2xl border border-amber-300/20 bg-amber-300/8 p-4 text-amber-50">
-                  <div className="flex items-start gap-3">
-                    <TimerReset className="mt-1 h-5 w-5 shrink-0 text-amber-200" />
-                    <div>
-                      <p className="font-black">
-                        تنبيه: كود الرحلة صالح لمدة 5 دقائق فقط حفاظًا على خصوصيتك.
-                      </p>
-                      <p className="mt-2 text-2xl font-black text-white">
-                        ينتهي خلال: {remainingLabel}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
                 <div className={`mb-5 rounded-2xl border p-4 ${countdownTone.border} ${countdownTone.bg}`}>
                   <div className="flex items-center justify-between gap-3">
                     <div className={`text-sm font-black ${countdownTone.text}`}>
@@ -875,8 +935,12 @@ export function LandingPage() {
       >
         <div className="grid gap-4 md:grid-cols-3">
           {features.map((feature) => (
-            <article
+            <motion.article
               key={feature.title}
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              whileHover={{ y: -6, scale: 1.01 }}
               className="group rounded-[1.6rem] border border-white/10 bg-white/[0.045] p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-300/35 hover:bg-white/[0.07]"
             >
               <div className="mb-5 grid h-13 w-13 place-items-center rounded-2xl bg-emerald-300/10 text-emerald-200 ring-1 ring-emerald-300/20 transition group-hover:scale-105">
@@ -884,7 +948,7 @@ export function LandingPage() {
               </div>
               <h3 className="text-2xl font-black text-white">{feature.title}</h3>
               <p className="mt-3 text-lg leading-8 text-slate-300">{feature.text}</p>
-            </article>
+            </motion.article>
           ))}
         </div>
       </motion.section>
@@ -902,15 +966,19 @@ export function LandingPage() {
 
         <div className="grid gap-4 md:grid-cols-4">
           {steps.map((step, index) => (
-            <article
+            <motion.article
               key={step}
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              whileHover={{ y: -6, scale: 1.01 }}
               className="rounded-[1.5rem] border border-white/10 bg-[#112235]/55 p-5 transition duration-300 hover:-translate-y-1 hover:border-blue-300/35"
             >
               <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-emerald-400 text-lg font-black text-white">
                 {index + 1}
               </div>
               <p className="text-lg font-bold leading-8 text-slate-100">{step}</p>
-            </article>
+            </motion.article>
           ))}
         </div>
       </motion.section>
@@ -956,7 +1024,7 @@ export function LandingPage() {
                 إغلاق
               </button>
             </div>
-            <div className="grid gap-3">
+          <div className="grid gap-3">
               {[
                 { icon: Camera, text: "افتح كاميرا الجوال." },
                 { icon: QrCode, text: "وجّه الكاميرا نحو QR." },
@@ -1000,8 +1068,10 @@ function IntroLanding({
   activationRef,
   onActivationInput,
   onActivateCode,
+  onThemeToggle,
   onShowActivation,
   showActivation,
+  theme,
 }: {
   activationInput: string;
   activationError: string;
@@ -1009,8 +1079,10 @@ function IntroLanding({
   activationRef: { current: HTMLElement | null };
   onActivationInput: (value: string) => void;
   onActivateCode: (event: FormEvent<HTMLFormElement>) => void;
+  onThemeToggle: () => void;
   onShowActivation: () => void;
   showActivation: boolean;
+  theme: "dark" | "light";
 }) {
   const introFeatures = [
     { icon: LockKeyhole, title: "خصوصية أعلى", text: "شارك الرحلة بدون تسليم جوالك." },
@@ -1027,10 +1099,20 @@ function IntroLanding({
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0b1a2b]/72 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-3 sm:px-6 sm:py-4 lg:px-8">
           <Brand />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onThemeToggle}
+              className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-100 transition hover:border-emerald-300/40"
+              aria-label="تبديل الوضع الليلي"
+            >
+              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
           <PrimaryLink href={activationWhatsappUrl}>
             <MessageCircle className="h-5 w-5" />
             اطلب كود التفعيل
           </PrimaryLink>
+          </div>
         </div>
       </header>
 
@@ -1070,37 +1152,17 @@ function IntroLanding({
           </div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.85, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-          className="glass-panel relative mx-auto w-full max-w-xl rounded-[2rem] p-5 sm:p-7"
-        >
-          <div className="relative h-72 overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#071221]/70">
-            <div className="absolute inset-8 rounded-[2rem] border border-emerald-300/15" />
-            <motion.div
-              animate={{ x: ["18%", "66%", "38%", "78%"], y: ["68%", "28%", "42%", "62%"] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute grid h-14 w-14 place-items-center rounded-full bg-emerald-400 text-[#071221] shadow-[0_0_44px_rgba(34,197,94,0.45)]"
-            >
-              <MapPin className="h-7 w-7" />
-            </motion.div>
-            <Route className="absolute bottom-9 left-10 h-32 w-32 rotate-12 text-blue-300/25" />
-            <Image
-              src="/nitaaq-official-logo-transparent.png"
-              alt="شعار نطاق الرسمي"
-              width={420}
-              height={420}
-              className="absolute bottom-6 right-6 h-28 w-28 object-contain opacity-90"
-            />
-          </div>
-        </motion.div>
+        <MapVisual />
       </section>
 
       <section className="relative z-10 mx-auto grid max-w-7xl gap-4 px-4 py-10 sm:px-6 md:grid-cols-3 lg:px-8">
         {introFeatures.map((feature) => (
-          <article
+          <motion.article
             key={feature.title}
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            whileHover={{ y: -6, scale: 1.01 }}
             className="rounded-[1.6rem] border border-white/10 bg-white/[0.045] p-6"
           >
             <div className="mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-emerald-300/10 text-emerald-200">
@@ -1108,7 +1170,7 @@ function IntroLanding({
             </div>
             <h2 className="text-2xl font-black text-white">{feature.title}</h2>
             <p className="mt-3 leading-8 text-slate-300">{feature.text}</p>
-          </article>
+          </motion.article>
         ))}
       </section>
 
