@@ -1,15 +1,16 @@
 {
   "name": "نطاق ماب",
-  "short_name": "Nitaaq Map",
-  "description": "أنشئ QR مؤقت لرابط خرائط جوجل واحمِ خصوصيتك أثناء مشاركة الرحلة.",
-  "lang": "ar",
-  "dir": "rtl",
+  "short_name": "نطاق",
+  "description": "إنشاء QR مؤقت لمشاركة روابط خرائط جوجل بأمان",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#0b1a2b",
   "theme_color": "#0b1a2b",
+  "dir": "rtl",
+  "direction": "rtl",
+  "lang": "ar",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/icon-192.png",

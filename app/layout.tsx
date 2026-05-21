@@ -9,9 +9,9 @@ const tajawal = Tajawal({
 });
 
 export const metadata: Metadata = {
+  applicationName: "نطاق ماب",
   title: "نطاق ماب | مشاركة الرحلات بأمان",
-  description:
-    "أنشئ QR مؤقت لرابط خرائط جوجل واحمِ خصوصيتك أثناء مشاركة الرحلة.",
+  description: "إنشاء QR مؤقت لمشاركة روابط خرائط جوجل بأمان",
   metadataBase: new URL("https://nitaaq-map.vercel.app"),
   manifest: "/manifest.json",
   icons: {
@@ -20,8 +20,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "نطاق ماب | مشاركة الرحلات بأمان",
-    description:
-      "أنشئ QR مؤقت لرابط خرائط جوجل واحمِ خصوصيتك أثناء مشاركة الرحلة.",
+    description: "إنشاء QR مؤقت لمشاركة روابط خرائط جوجل بأمان",
     siteName: "نطاق ماب",
     locale: "ar_SA",
     type: "website",
@@ -37,14 +36,19 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "نطاق ماب | مشاركة الرحلات بأمان",
-    description:
-      "أنشئ QR مؤقت لرابط خرائط جوجل واحمِ خصوصيتك أثناء مشاركة الرحلة.",
+    description: "إنشاء QR مؤقت لمشاركة روابط خرائط جوجل بأمان",
     images: ["/og-image.png"],
   },
   appleWebApp: {
     capable: true,
     title: "نطاق ماب",
     statusBarStyle: "black-translucent",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-title": "نطاق ماب",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
   },
 };
 

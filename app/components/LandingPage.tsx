@@ -53,6 +53,11 @@ type ApiResponse =
       error: string;
     };
 
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+};
+
 const sectionMotion = {
   initial: { opacity: 0, y: 28 },
   whileInView: { opacity: 1, y: 0 },
@@ -255,21 +260,32 @@ function PrimaryLink({
   );
 }
 
+function InstallPromptButton({
+  isVisible,
+  onInstall,
+}: {
+  isVisible: boolean;
+  onInstall: () => void;
+}) {
+  if (!isVisible) {
+    return null;
+  }
+
+  return (
+    <motion.button
+      type="button"
+      onClick={onInstall}
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] right-4 z-[60] inline-flex max-w-[calc(100vw-6rem)] items-center justify-center gap-2 rounded-full border border-emerald-300/25 bg-[#071221]/88 px-4 py-3 text-sm font-black text-white shadow-[0_20px_70px_rgba(37,99,235,0.22)] backdrop-blur-xl transition hover:-translate-y-1 hover:border-emerald-300/45 sm:bottom-7 sm:left-7 sm:right-auto sm:max-w-none"
+    >
+      <Download className="h-5 w-5 text-emerald-200" />
+      يمكنك إضافة نطاق ماب إلى الشاشة الرئيسية
+    </motion.button>
+  );
+}
+
 function MapVisual() {
-  const roads = [
-    "M0 88 C140 72 210 118 340 98 S510 40 700 62 S910 132 1120 88",
-    "M20 176 C180 154 270 198 420 176 S680 120 820 152 S1010 224 1180 172",
-    "M0 266 C170 230 320 270 470 246 S720 198 920 238 S1060 306 1200 250",
-    "M120 30 L250 360",
-    "M325 0 L530 360",
-    "M615 20 L520 360",
-    "M760 0 L930 360",
-    "M1020 0 L880 360",
-    "M60 330 L1140 30",
-    "M215 18 L1130 318",
-    "M0 118 L1180 118",
-    "M0 214 L1200 214",
-  ];
   const pins = [
     { x: 18, y: 64, delay: 0 },
     { x: 38, y: 38, delay: 0.25 },
@@ -286,28 +302,6 @@ function MapVisual() {
       className="map-visual relative h-80 overflow-hidden"
       aria-hidden="true"
     >
-      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1200 360" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="roadGradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="currentColor" stopOpacity="0.15" />
-            <stop offset="52%" stopColor="currentColor" stopOpacity="0.72" />
-            <stop offset="100%" stopColor="currentColor" stopOpacity="0.18" />
-          </linearGradient>
-        </defs>
-        {roads.map((road, index) => (
-          <motion.path
-            key={road}
-            d={road}
-            fill="none"
-            stroke="url(#roadGradient)"
-            strokeWidth={index < 3 ? 8 : 3}
-            strokeLinecap="round"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 1.2, delay: index * 0.04, ease: "easeOut" }}
-          />
-        ))}
-      </svg>
       {pins.map((pin) => (
         <motion.div
           key={`${pin.x}-${pin.y}`}
@@ -325,11 +319,6 @@ function MapVisual() {
           <span className="absolute left-1/2 top-9 h-4 w-10 -translate-x-1/2 rounded-full bg-current opacity-20 blur-md" />
         </motion.div>
       ))}
-      <motion.div
-        className="absolute bottom-10 right-12 h-5 w-5 rounded-full bg-emerald-300 shadow-[0_0_34px_rgba(45,212,191,0.65)]"
-        animate={{ scale: [1, 1.65, 1], opacity: [0.75, 1, 0.75] }}
-        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-      />
     </motion.div>
   );
 }
@@ -345,6 +334,8 @@ export function LandingPage() {
   const [infoMessage, setInfoMessage] = useState("");
   const [copied, setCopied] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [activationChecked, setActivationChecked] = useState(false);
   const [isActivated, setIsActivated] = useState(false);
@@ -395,6 +386,36 @@ export function LandingPage() {
       // PWA registration: intentionally small and non-blocking for Vercel.
       navigator.serviceWorker.register("/sw.js").catch(() => undefined);
     }
+  }, []);
+
+  useEffect(() => {
+    const navigatorWithStandalone = window.navigator as Navigator & { standalone?: boolean };
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      navigatorWithStandalone.standalone === true;
+
+    if (isStandalone) {
+      return;
+    }
+
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+      setShowInstallPrompt(true);
+    };
+
+    const handleAppInstalled = () => {
+      setInstallPrompt(null);
+      setShowInstallPrompt(false);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
   }, []);
 
   useEffect(() => {
@@ -575,6 +596,20 @@ export function LandingPage() {
     return `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
   }
 
+  async function installApp() {
+    if (!installPrompt) {
+      return;
+    }
+
+    await installPrompt.prompt();
+    const choice = await installPrompt.userChoice;
+
+    if (choice.outcome === "accepted") {
+      setShowInstallPrompt(false);
+      setInstallPrompt(null);
+    }
+  }
+
   if (!activationChecked) {
     return (
       <main className="grid min-h-screen place-items-center bg-[#0b1a2b] px-6 text-center text-white">
@@ -585,24 +620,30 @@ export function LandingPage() {
 
   if (!isActivated) {
     return (
-      <IntroLanding
-        activationInput={activationInput}
-        activationError={activationError}
-        activationSuccess={activationSuccess}
-        activationRef={activationRef}
-        onActivationInput={setActivationInput}
-        onActivateCode={activateCode}
-        onThemeToggle={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
-        onShowActivation={() => {
-          setShowActivation(true);
-          setTimeout(
-            () => activationRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
-            50,
-          );
-        }}
-        showActivation={showActivation}
-        theme={theme}
-      />
+      <>
+        <IntroLanding
+          activationInput={activationInput}
+          activationError={activationError}
+          activationSuccess={activationSuccess}
+          activationRef={activationRef}
+          onActivationInput={setActivationInput}
+          onActivateCode={activateCode}
+          onThemeToggle={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
+          onShowActivation={() => {
+            setShowActivation(true);
+            setTimeout(
+              () => activationRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+              50,
+            );
+          }}
+          showActivation={showActivation}
+          theme={theme}
+        />
+        <InstallPromptButton
+          isVisible={showInstallPrompt && Boolean(installPrompt)}
+          onInstall={installApp}
+        />
+      </>
     );
   }
 
@@ -1057,6 +1098,11 @@ export function LandingPage() {
         <MessageCircle className="h-6 w-6 sm:h-5 sm:w-5" />
         <span className="hidden sm:inline">تواصل واتساب</span>
       </a>
+
+      <InstallPromptButton
+        isVisible={showInstallPrompt && Boolean(installPrompt)}
+        onInstall={installApp}
+      />
     </main>
   );
 }
