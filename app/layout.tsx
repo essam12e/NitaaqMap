@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Tajawal } from "next/font/google";
 import "./globals.css";
 
@@ -9,13 +9,47 @@ const tajawal = Tajawal({
 });
 
 export const metadata: Metadata = {
-  title: "نطاق | ماب - شارك رحلتك بدون تسليم جوالك",
+  title: "نطاق ماب | مشاركة الرحلات بأمان",
   description:
-    "أنشئ QR مؤقت لرابط رحلتك من Google Maps وشاركه مع السائق بأمان خلال ثواني.",
+    "أنشئ QR مؤقت لرابط خرائط جوجل واحمِ خصوصيتك أثناء مشاركة الرحلة.",
   metadataBase: new URL("https://nitaaq-map.vercel.app"),
+  manifest: "/manifest.json",
   icons: {
-    icon: "/favicon.svg",
+    icon: "/icon-192.png",
+    apple: "/apple-touch-icon.png",
   },
+  openGraph: {
+    title: "نطاق ماب | مشاركة الرحلات بأمان",
+    description:
+      "أنشئ QR مؤقت لرابط خرائط جوجل واحمِ خصوصيتك أثناء مشاركة الرحلة.",
+    siteName: "نطاق ماب",
+    locale: "ar_SA",
+    type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "شعار نطاق ماب",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "نطاق ماب | مشاركة الرحلات بأمان",
+    description:
+      "أنشئ QR مؤقت لرابط خرائط جوجل واحمِ خصوصيتك أثناء مشاركة الرحلة.",
+    images: ["/og-image.png"],
+  },
+  appleWebApp: {
+    capable: true,
+    title: "نطاق ماب",
+    statusBarStyle: "black-translucent",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0b1a2b",
 };
 
 export default function RootLayout({

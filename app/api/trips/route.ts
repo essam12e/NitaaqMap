@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { createTripToken, isGoogleMapsUrl } from "@/lib/trip-token";
+import {
+  createTripToken,
+  isGoogleMapsUrl,
+  normalizeGoogleMapsUrl,
+} from "@/lib/trip-token";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
@@ -7,6 +11,7 @@ export async function POST(request: Request) {
     siteOrigin?: unknown;
   } | null;
   const url = typeof body?.url === "string" ? body.url.trim() : "";
+  const normalizedUrl = normalizeGoogleMapsUrl(url);
 
   if (!url) {
     return NextResponse.json(
@@ -22,7 +27,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { id, expiresAt } = createTripToken(url);
+  const { id, expiresAt } = createTripToken(normalizedUrl);
   const origin =
     typeof body?.siteOrigin === "string" && /^https?:\/\//.test(body.siteOrigin)
       ? body.siteOrigin

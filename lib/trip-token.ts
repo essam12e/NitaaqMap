@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+export { isGoogleMapsUrl, normalizeGoogleMapsUrl } from "./maps-url";
 
 const TOKEN_TTL_MS = 5 * 60 * 1000;
 const SECRET =
@@ -94,31 +95,5 @@ export function verifyTripToken(id: string): TripTokenResult {
     };
   } catch {
     return { ok: false, reason: "invalid" };
-  }
-}
-
-export function isGoogleMapsUrl(value: string) {
-  try {
-    const url = new URL(value.trim());
-    const host = url.hostname.toLowerCase();
-    const path = url.pathname.toLowerCase();
-
-    if (host === "maps.app.goo.gl") {
-      return true;
-    }
-
-    if (host === "goo.gl" && path.startsWith("/maps")) {
-      return true;
-    }
-
-    const isGoogleHost =
-      host === "google.com" ||
-      host.endsWith(".google.com") ||
-      host === "maps.google.com" ||
-      host.endsWith(".maps.google.com");
-
-    return isGoogleHost && (path === "/maps" || path.startsWith("/maps/"));
-  } catch {
-    return false;
   }
 }
