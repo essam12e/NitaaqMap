@@ -36,11 +36,17 @@ const whatsappUrl = "https://wa.me/966573730430";
 const activationWhatsappUrl =
   "https://wa.me/966573730430?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%B1%D9%8A%D8%AF%20%D8%B7%D9%84%D8%A8%20%D9%83%D9%88%D8%AF%20%D8%AA%D9%81%D8%B9%D9%8A%D9%84%20%D9%86%D8%B7%D8%A7%D9%82%20%D9%85%D8%A7%D8%A8";
 const activationCode = "NT-7KQ4-M9X2-ZP8A";
+const nitaaqSiteUrl = "https://nitaaq-map.vercel.app";
 const qrTtlMs = 5 * 60 * 1000;
 
 type TripResult = {
   tripUrl: string;
   expiresAt: string;
+  qrDataUrl: string;
+};
+
+type SiteQrResult = {
+  siteUrl: string;
   qrDataUrl: string;
 };
 
@@ -96,6 +102,28 @@ function formatRemaining(ms: number) {
   const seconds = (totalSeconds % 60).toString().padStart(2, "0");
 
   return `${minutes}:${seconds}`;
+}
+
+function getMapLinkValidation(value: string) {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return "idle";
+  }
+
+  if (isGoogleMapsUrl(trimmed)) {
+    return "valid";
+  }
+
+  const lowerValue = trimmed.toLowerCase();
+  const looksGoogleMapsRelated =
+    lowerValue.includes("google") ||
+    lowerValue.includes("maps") ||
+    lowerValue.includes("goo.gl") ||
+    lowerValue.startsWith("http") ||
+    lowerValue.includes("gps");
+
+  return looksGoogleMapsRelated ? "incomplete" : "invalid";
 }
 
 function roundedRect(
@@ -326,13 +354,16 @@ function MapVisual() {
 export function LandingPage() {
   const [url, setUrl] = useState("");
   const [result, setResult] = useState<TripResult | null>(null);
+  const [siteQrResult, setSiteQrResult] = useState<SiteQrResult | null>(null);
   const [remainingMs, setRemainingMs] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
+  const [isSiteQrLoading, setIsSiteQrLoading] = useState(false);
   const [isEmergencyLoading, setIsEmergencyLoading] = useState(false);
   const [error, setError] = useState("");
   const [infoMessage, setInfoMessage] = useState("");
   const [copied, setCopied] = useState(false);
+  const [siteQrCopied, setSiteQrCopied] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
@@ -349,13 +380,8 @@ export function LandingPage() {
   const isExpired = result ? remainingMs <= 0 : false;
 
   const remainingLabel = useMemo(() => formatRemaining(remainingMs), [remainingMs]);
-  const linkValidation = useMemo(() => {
-    if (!url.trim()) {
-      return "idle";
-    }
-
-    return isGoogleMapsUrl(url) ? "valid" : "invalid";
-  }, [url]);
+  const linkValidation = useMemo(() => getMapLinkValidation(url), [url]);
+  const canCreateTripQr = linkValidation === "valid" && !isLoading;
   const countdownTone = useMemo(() => getCountdownTone(remainingMs), [remainingMs]);
   const countdownProgress = result
     ? Math.max(0, Math.min(100, (remainingMs / qrTtlMs) * 100))
@@ -444,7 +470,11 @@ export function LandingPage() {
     }
 
     if (!isGoogleMapsUrl(nextUrl)) {
-      setError("الرابط غير صحيح، الصق رابط خرائط جوجل أو إحداثيات صحيحة.");
+      setError(
+        getMapLinkValidation(nextUrl) === "incomplete"
+          ? "الرابط غير مكتمل، تأكد من نسخه بالكامل من خرائط Google"
+          : "يرجى إدخال رابط من خرائط Google فقط",
+      );
       return;
     }
 
@@ -507,6 +537,55 @@ export function LandingPage() {
     document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
+  }
+
+  async function createSiteQr() {
+    setError("");
+    setInfoMessage("");
+    setIsSiteQrLoading(true);
+
+    try {
+      const qrDataUrl = await createBrandedQrDataUrl(nitaaqSiteUrl);
+      setSiteQrResult({
+        siteUrl: nitaaqSiteUrl,
+        qrDataUrl,
+      });
+      setInfoMessage("تم إنشاء QR خاص بمشاركة موقع نطاق ماب.");
+    } catch {
+      setError("تعذر إنشاء QR للموقع. حاول مرة أخرى.");
+    } finally {
+      setIsSiteQrLoading(false);
+    }
+  }
+
+  async function copySiteLink() {
+    if (!siteQrResult) {
+      return;
+    }
+
+    await navigator.clipboard.writeText(siteQrResult.siteUrl);
+    setSiteQrCopied(true);
+    window.setTimeout(() => setSiteQrCopied(false), 1800);
+  }
+
+  function downloadSiteQr() {
+    if (!siteQrResult) {
+      return;
+    }
+
+    const anchor = document.createElement("a");
+    anchor.href = siteQrResult.qrDataUrl;
+    anchor.download = "nitaaq-map-site-qr.png";
+    anchor.target = "_blank";
+    anchor.rel = "noopener noreferrer";
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  }
+
+  function shareSiteQrWhatsapp() {
+    const message = `هذا رابط موقع نطاق ماب لمشاركة الرحلات بأمان:\n${nitaaqSiteUrl}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
   }
 
   function resetTrip() {
@@ -795,20 +874,26 @@ export function LandingPage() {
               {linkValidation === "valid" && (
                 <p className="mt-3 flex items-center gap-2 text-sm font-bold text-emerald-200">
                   <CheckCircle2 className="h-4 w-4" />
-                  تم التحقق من رابط خرائط جوجل
+                  الرابط صحيح وجاهز لإنشاء QR
+                </p>
+              )}
+              {linkValidation === "incomplete" && (
+                <p className="mt-3 flex items-center gap-2 text-sm font-bold text-orange-100">
+                  <AlertCircle className="h-4 w-4" />
+                  الرابط غير مكتمل، تأكد من نسخه بالكامل من خرائط Google
                 </p>
               )}
               {linkValidation === "invalid" && (
                 <p className="mt-3 flex items-center gap-2 text-sm font-bold text-red-200">
                   <AlertCircle className="h-4 w-4" />
-                  الرابط غير صحيح، استخدم رابط Google Maps أو إحداثيات مثل 24.7136,46.6753
+                  يرجى إدخال رابط من خرائط Google فقط
                 </p>
               )}
             </div>
             <button
               type="submit"
               data-create-qr-button
-              disabled={isLoading}
+              disabled={!canCreateTripQr}
               className="glow-button inline-flex h-16 items-center justify-center gap-3 rounded-3xl px-8 text-lg font-black text-white transition duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isLoading ? (
@@ -820,7 +905,7 @@ export function LandingPage() {
             </button>
           </form>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             <button
               type="button"
               onClick={createQrForCurrentLocation}
@@ -833,6 +918,19 @@ export function LandingPage() {
                 <Navigation className="h-5 w-5" />
               )}
               توليد كود لموقعي الحالي
+            </button>
+            <button
+              type="button"
+              onClick={createSiteQr}
+              disabled={isSiteQrLoading}
+              className="inline-flex min-h-13 items-center justify-center gap-2 rounded-2xl border border-blue-300/25 bg-blue-400/10 px-4 py-3 text-sm font-extrabold text-slate-100 transition hover:border-blue-300/45 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSiteQrLoading ? (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-100/30 border-t-slate-100" />
+              ) : (
+                <QrCode className="h-5 w-5" />
+              )}
+              QR للموقع
             </button>
             <button
               type="button"
@@ -860,6 +958,65 @@ export function LandingPage() {
               <CheckCircle2 className="h-5 w-5 shrink-0" />
               {infoMessage}
             </div>
+          )}
+
+          {siteQrResult && (
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="mt-8 grid items-start gap-6 rounded-[2rem] border border-blue-300/15 bg-white/[0.04] p-4 sm:p-6 lg:grid-cols-[minmax(220px,0.65fr)_minmax(0,1fr)]"
+            >
+              <div className="mx-auto w-full max-w-xs rounded-[1.6rem] bg-white p-4 shadow-[0_24px_70px_rgba(0,0,0,0.2)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={siteQrResult.qrDataUrl}
+                  alt="QR Code لمشاركة موقع نطاق ماب"
+                  className="mx-auto aspect-square w-full rounded-3xl"
+                />
+              </div>
+              <div className="min-w-0">
+                <div className="inline-flex items-center gap-2 rounded-full border border-blue-300/20 bg-blue-300/10 px-4 py-2 text-sm font-black text-emerald-200">
+                  <QrCode className="h-4 w-4" />
+                  QR خاص بالموقع
+                </div>
+                <h3 className="mt-4 text-2xl font-black text-white">
+                  مشاركة موقع نطاق ماب
+                </h3>
+                <p className="mt-3 leading-8 text-slate-300">
+                  هذا QR لمشاركة رابط الموقع نفسه فقط، وليس QR رحلة أو رابط خرائط Google. لا ينتهي بعد 5 دقائق.
+                </p>
+                <p className="mt-3 break-all rounded-2xl border border-white/10 bg-[#071221]/70 px-4 py-3 text-left text-sm font-bold text-slate-200" dir="ltr">
+                  {siteQrResult.siteUrl}
+                </p>
+                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  <button
+                    type="button"
+                    onClick={downloadSiteQr}
+                    className="glow-button inline-flex min-h-13 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-extrabold text-white"
+                  >
+                    <Download className="h-5 w-5" />
+                    تحميل QR
+                  </button>
+                  <button
+                    type="button"
+                    onClick={copySiteLink}
+                    className="inline-flex min-h-13 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-sm font-extrabold text-white transition hover:border-emerald-300/40"
+                  >
+                    <Copy className="h-5 w-5" />
+                    {siteQrCopied ? "تم النسخ" : "نسخ الرابط"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={shareSiteQrWhatsapp}
+                    className="inline-flex min-h-13 items-center justify-center gap-2 rounded-2xl border border-emerald-300/20 bg-emerald-300/8 px-4 py-3 text-sm font-extrabold text-emerald-100 transition hover:border-emerald-300/45"
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                    واتساب
+                  </button>
+                </div>
+              </div>
+            </motion.div>
           )}
 
           {result && (
