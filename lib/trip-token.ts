@@ -1,10 +1,25 @@
 import crypto from "node:crypto";
+import { isGoogleMapsUrl } from "./maps-url";
 export { isGoogleMapsUrl, normalizeGoogleMapsUrl } from "./maps-url";
 
 const TOKEN_TTL_MS = 5 * 60 * 1000;
-const SECRET =
-  process.env.TRIP_TOKEN_SECRET ??
-  "dev-only-change-this-secret-before-production-deploy";
+const DEV_FALLBACK_SECRET = "dev-only-change-this-secret-before-production-deploy";
+const MIN_SECRET_LENGTH = 32;
+
+// Fail closed: in production a missing/short secret must never fall back to the public dev value,
+// otherwise anyone could sign their own never-expiring trip links.
+function getSecret() {
+  const secret = process.env.TRIP_TOKEN_SECRET;
+  if (secret && secret.length >= MIN_SECRET_LENGTH) {
+    return secret;
+  }
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      `TRIP_TOKEN_SECRET must be set to at least ${MIN_SECRET_LENGTH} characters in production.`,
+    );
+  }
+  return secret || DEV_FALLBACK_SECRET;
+}
 
 type TripPayload = {
   v: 1;
@@ -27,7 +42,7 @@ function decodeBase64Url(value: string) {
 }
 
 function sign(payload: string) {
-  return crypto.createHmac("sha256", SECRET).update(payload).digest("base64url");
+  return crypto.createHmac("sha256", getSecret()).update(payload).digest("base64url");
 }
 
 function timingSafeEqual(left: string, right: string) {
@@ -79,8 +94,15 @@ export function verifyTripToken(id: string): TripTokenResult {
     if (
       payload.v !== 1 ||
       typeof payload.url !== "string" ||
-      typeof payload.exp !== "number"
+      typeof payload.exp !== "number" ||
+      typeof payload.iat !== "number"
     ) {
+      return { ok: false, reason: "invalid" };
+    }
+
+    // Defence in depth: even a validly signed token may never live longer than the TTL,
+    // and may only redirect to Google Maps.
+    if (payload.exp - payload.iat > TOKEN_TTL_MS || !isGoogleMapsUrl(payload.url)) {
       return { ok: false, reason: "invalid" };
     }
 

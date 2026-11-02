@@ -11,8 +11,8 @@ import crypto from "node:crypto";
 const BASE = process.env.BASE ?? "http://localhost:3000";
 
 // Same token format as lib/trip-token.ts (v1 payload, HMAC-SHA256, base64url), with a chosen issue time.
-function signTokenIssuedAt(url, issuedAtMs, secret) {
-  const payload = { v: 1, url, iat: issuedAtMs, exp: issuedAtMs + 5 * 60 * 1000, nonce: crypto.randomBytes(12).toString("base64url") };
+function signTokenIssuedAt(url, issuedAtMs, secret, ttlMs = 5 * 60 * 1000) {
+  const payload = { v: 1, url, iat: issuedAtMs, exp: issuedAtMs + ttlMs, nonce: crypto.randomBytes(12).toString("base64url") };
   const encoded = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
   const signature = crypto.createHmac("sha256", secret).update(encoded).digest("base64url");
   return `${encoded}.${signature}`;
@@ -68,6 +68,12 @@ if (process.env.TRIP_TOKEN_SECRET) {
   const old = signTokenIssuedAt(mapsUrl, Date.now() - (5 * 60 * 1000 + 1000), secret);
   const stale = await scan(`${BASE}/trip/${old}`);
   check("screenshot of a QR older than 5 min is refused", stale.status === 200 && stale.expired && !stale.location, `status=${stale.status}`);
+
+  // Server hardening (lib/trip-token.ts): signed tokens longer than the TTL, or pointing outside Google Maps, are refused.
+  const longLived = await scan(`${BASE}/trip/${signTokenIssuedAt(mapsUrl, Date.now(), secret, 365 * 24 * 3600 * 1000)}`);
+  check("signed token with a TTL longer than 5 min is refused", longLived.status === 200 && longLived.expired && !longLived.location, `status=${longLived.status}`);
+  const offsite = await scan(`${BASE}/trip/${signTokenIssuedAt("https://evil.example/phish", Date.now(), secret)}`);
+  check("signed token redirecting outside Google Maps is refused", offsite.status === 200 && offsite.expired && !offsite.location, `status=${offsite.status}`);
 } else {
   console.log("SKIP  backdated token check (TRIP_TOKEN_SECRET not provided)");
 }
@@ -80,7 +86,11 @@ const forged = `${Buffer.from(JSON.stringify(decoded)).toString("base64url")}.${
 const forgedScan = await scan(`${BASE}/trip/${forged}`);
 check("payload with extended exp (forged) is refused", forgedScan.status === 200 && forgedScan.expired && !forgedScan.location);
 
-// 6. Real-time wait: the very same QR link must stop working after 5 minutes.
+// 6. The public dev fallback secret must not be accepted by the server under test.
+const devSigned = await scan(`${BASE}/trip/${signTokenIssuedAt(mapsUrl, Date.now(), "dev-only-change-this-secret-before-production-deploy")}`);
+check("token signed with the public dev fallback secret is refused", devSigned.status === 200 && devSigned.expired && !devSigned.location, `status=${devSigned.status}`);
+
+// 7. Real-time wait: the very same QR link must stop working after 5 minutes.
 if (process.argv.includes("--wait-real-ttl")) {
   const waitMs = Date.parse(created.expiresAt) - Date.now() + 5_000;
   console.log(`...waiting ${Math.round(waitMs / 1000)} s of real time`);
