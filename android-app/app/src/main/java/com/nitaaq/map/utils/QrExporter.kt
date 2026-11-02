@@ -39,6 +39,7 @@ class QrExporter(private val context: Context) {
                 values.clear()
                 values.put(MediaStore.Images.Media.IS_PENDING, 0)
                 resolver.update(uri, values, null, null)
+                Unit
             } catch (e: Exception) {
                 resolver.delete(uri, null, null)
                 throw e
