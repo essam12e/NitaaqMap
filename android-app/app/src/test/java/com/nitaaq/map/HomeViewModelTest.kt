@@ -20,6 +20,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -87,9 +88,13 @@ class HomeViewModelTest {
         assertTrue(vm.state.value.isLoading)
         assertEquals(1, repo.calls)
         repo.gate.complete(TripResult.Success(trip()))
+        // The DataStore write resumes on its own IO thread, so wait for the
+        // view model to finish instead of asserting on the very next line.
+        withTimeout(10_000) { vm.state.first { !it.isLoading } }
+        assertFalse(vm.state.value.isLoading)
+        assertEquals(1, repo.calls)
         // Saved for the result screen / next app launch.
         assertEquals("a.b", store.activeTrip.first()?.id)
-        assertFalse(vm.state.value.isLoading)
     }
 
     @Test
