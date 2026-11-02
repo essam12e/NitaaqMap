@@ -7,3 +7,6 @@ final-check.png
 whatsapp-button-check.png
 .env
 .env*.local
+
+# Native Android app (built separately, not part of the website deploy)
+android-app
