@@ -214,15 +214,16 @@ private fun QrCard(state: ResultUiState, modifier: Modifier = Modifier) {
         Box(Modifier.padding(Spacing.lg), contentAlignment = Alignment.Center) {
             // Re-key on the token so a renewed code animates in.
             AnimatedContent(
-                targetState = state.trip?.id,
+                targetState = state.trip?.id to qr,
+                contentKey = { it.first },
                 transitionSpec = {
                     if (reduced) fadeIn(tween(0)) togetherWith fadeOut(tween(0))
                     else (fadeIn(tween(300)) + scaleIn(initialScale = 0.92f)) togetherWith fadeOut(tween(150))
                 },
                 label = "qr",
-            ) { _ ->
+            ) { target ->
                 QrCodeView(
-                    matrix = qr,
+                    matrix = target.second,
                     ink = NitaaqTheme.colors.qrInk,
                     paper = NitaaqTheme.colors.qrPaper,
                     description = stringResource(R.string.result_qr_description),
