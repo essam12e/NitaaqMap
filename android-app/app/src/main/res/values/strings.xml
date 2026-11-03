@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">نطاق ماب</string>
+
+    <!-- Home -->
+    <string name="home_greeting">شارك رحلتك بأمان</string>
+    <string name="home_subtitle">حوّل رابط Google Maps إلى رمز QR مؤقت ينتهي خلال ٥ دقائق، ويتحقق منه الخادم عند كل مسح.</string>
+    <string name="home_input_label">رابط الرحلة من Google Maps</string>
+    <string name="home_input_placeholder">الصق الرابط أو الإحداثيات هنا</string>
+    <string name="home_paste">لصق</string>
+    <string name="home_clear">مسح الحقل</string>
+    <string name="home_create_qr">إنشاء رمز QR</string>
+    <string name="home_creating">جارٍ إنشاء الرابط المؤقت…</string>
+    <string name="home_valid_link">رابط صالح، جاهز للإنشاء</string>
+    <string name="home_clipboard_empty">لا يوجد رابط في الحافظة</string>
+    <string name="home_active_trip">لديك رمز نشط</string>
+    <string name="home_active_trip_action">عرض</string>
+    <string name="home_step_1">الصق الرابط</string>
+    <string name="home_step_2">أنشئ الرمز</string>
+    <string name="home_step_3">يمسحه السائق</string>
+    <string name="home_how_title">كيف يعمل؟</string>
+    <string name="home_how_body">الرمز يحتوي رابطًا مؤقتًا موقّعًا من الخادم، وليس رابط موقعك المباشر. بعد ٥ دقائق يرفض الخادم فتحه، حتى لو احتُفظ بصورة الرمز.</string>
+    <string name="settings">الإعدادات</string>
+
+    <!-- Errors -->
+    <string name="error_empty">فضلًا الصق رابط الرحلة أولًا.</string>
+    <string name="error_invalid">الرابط يجب أن يكون رابط خرائط Google صالحًا.</string>
+    <string name="error_offline">لا يوجد اتصال بالإنترنت. تحقق من الشبكة ثم أعد المحاولة.</string>
+    <string name="error_timeout">الخادم لم يستجب في الوقت المحدد. أعد المحاولة.</string>
+    <string name="error_server">تعذّر إنشاء الرابط الآن (رمز %1$d). أعد المحاولة بعد قليل.</string>
+    <string name="error_untrusted">استجابة غير متوقعة من الخادم، لم يُنشأ أي رمز.</string>
+    <string name="retry">إعادة المحاولة</string>
+
+    <!-- Result -->
+    <string name="result_title">رمز الرحلة</string>
+    <string name="back">رجوع</string>
+    <string name="result_status_active">نشط</string>
+    <string name="result_status_expiring">على وشك الانتهاء</string>
+    <string name="result_status_expired">انتهت الصلاحية</string>
+    <string name="result_remaining">الوقت المتبقي</string>
+    <string name="result_hint_active">اطلب من السائق مسح الرمز الآن. يفتح الرمز الرحلة في Google Maps بعد تحقق الخادم.</string>
+    <string name="result_hint_expiring">أقل من دقيقة متبقية. بعدها سيرفض الخادم فتح الرحلة.</string>
+    <string name="result_hint_expired">هذا الرمز لم يعد يعمل، حتى لو حُفظت صورته. أنشئ رمزًا جديدًا للرحلة نفسها.</string>
+    <string name="result_share">مشاركة</string>
+    <string name="result_save">حفظ</string>
+    <string name="result_new">رمز جديد</string>
+    <string name="result_renew">تجديد الرمز لنفس الرحلة</string>
+    <string name="result_another_link">رابط آخر</string>
+    <string name="result_saved">حُفظت الصورة في المعرض (Pictures/NitaaqMap)</string>
+    <string name="result_save_failed">تعذّر حفظ الصورة</string>
+    <string name="result_share_failed">تعذّرت المشاركة</string>
+    <string name="result_share_text">رابط رحلة مؤقت من نطاق ماب (صالح حتى %1$s):\n%2$s</string>
+    <string name="result_share_chooser">مشاركة رمز الرحلة</string>
+    <string name="result_qr_description">رمز QR للرابط المؤقت للرحلة</string>
+    <string name="result_expired_overlay">منتهي</string>
+    <string name="result_no_trip">لا يوجد رمز نشط</string>
+    <string name="result_valid_until">صالح حتى %1$s</string>
+    <string name="qr_image_caption">امسح الرمز لفتح الرحلة</string>
+
+    <!-- Settings -->
+    <string name="settings_appearance">المظهر</string>
+    <string name="theme_system">حسب النظام</string>
+    <string name="theme_light">فاتح</string>
+    <string name="theme_dark">داكن</string>
+    <string name="settings_about">عن التطبيق</string>
+    <string name="settings_about_body">نطاق ماب ينشئ رموز QR مؤقتة لروابط رحلات Google Maps. لا حسابات، ولا تتبع، ولا يُخزَّن موقعك على الخادم: الرابط المؤقت موقّع وينتهي ذاتيًا بعد ٥ دقائق.</string>
+    <string name="settings_privacy">سياسة الخصوصية</string>
+    <string name="settings_privacy_unavailable">ستتوفر قريبًا</string>
+    <string name="settings_website">الموقع الإلكتروني</string>
+    <string name="settings_version">الإصدار</string>
+    <string name="settings_server">الخادم</string>
+    <string name="settings_licenses">خط Tajawal مرخّص بموجب SIL Open Font License 1.1</string>
+</resources>
