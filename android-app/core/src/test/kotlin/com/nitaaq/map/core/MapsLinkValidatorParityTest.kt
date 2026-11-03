@@ -26,7 +26,7 @@ class MapsLinkValidatorParityTest {
 
     @Test
     fun fixtureIsNotEmpty() {
-        assertTrue(cases.size >= 40)
+        assertTrue(cases.size >= 80)
     }
 
     @Test

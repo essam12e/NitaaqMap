@@ -17,12 +17,127 @@
   {
     "input": "https://www.google.com/maps/dir/24.7136,46.6753/21.4858,39.1925",
     "valid": true,
-    "normalized": "https://www.google.com/maps/search/?api=1&query=24.7136,46.6753"
+    "normalized": "https://www.google.com/maps/search/?api=1&query=21.4858,39.1925"
+  },
+  {
+    "input": "https://www.google.com/maps/dir/24.7136,46.6753/26.4207,50.0888/21.4858,39.1925",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/search/?api=1&query=21.4858,39.1925"
+  },
+  {
+    "input": "https://www.google.com/maps/dir/24.7136,46.6753/21.4858,39.1925/@23.1,43.0,7z/data=!3m1!4b1!4m2!4m1!3e0",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/search/?api=1&query=21.4858,39.1925"
+  },
+  {
+    "input": "https://www.google.com/maps/dir/Riyadh/Jeddah+Corniche/@22,40,6z/data=!4m2",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/dir/?api=1&destination=Jeddah%20Corniche"
+  },
+  {
+    "input": "https://www.google.com/maps/dir/%D8%A7%D9%84%D8%B1%D9%8A%D8%A7%D8%B6/%D8%AC%D8%AF%D8%A9",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/dir/?api=1&destination=%D8%AC%D8%AF%D8%A9"
+  },
+  {
+    "input": "https://www.google.com/maps/dir//24.7,46.6/",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/search/?api=1&query=24.7,46.6"
+  },
+  {
+    "input": "https://www.google.com/maps/dir/24.7,46.6/21.4858,+39.1925",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/search/?api=1&query=21.4858,39.1925"
+  },
+  {
+    "input": "https://www.google.com/maps/dir/24.7,46.6/21.4858,%2039.1925",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/search/?api=1&query=21.4858,39.1925"
+  },
+  {
+    "input": "https://www.google.com/maps/dir/?api=1&origin=24.7,46.6&destination=21.4858,39.1925",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/search/?api=1&query=21.4858,39.1925"
+  },
+  {
+    "input": "https://www.google.com/maps/dir/?api=1&origin=Riyadh&destination=Jeddah%20Corniche&travelmode=driving",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/dir/?api=1&destination=Jeddah%20Corniche"
+  },
+  {
+    "input": "https://www.google.com/maps/dir/?api=1&destination=caf%C3%A9+%26+bakery",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/dir/?api=1&destination=caf%C3%A9%20%26%20bakery"
+  },
+  {
+    "input": "https://www.google.com/maps/dir/",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/dir/"
+  },
+  {
+    "input": "https://www.google.com/maps/dir/24.7,46.6/91,46",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/dir/?api=1&destination=91%2C46"
+  },
+  {
+    "input": "https://www.google.com/maps/dir/A/%E0%A4%A",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/dir/?api=1&destination=%25E0%25A4%25A"
+  },
+  {
+    "input": "https://www.google.com/maps/dir/A/it%27s+(here)*~!",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/dir/?api=1&destination=it's%20(here)*~!"
+  },
+  {
+    "input": "الطريق: https://www.google.com/maps/dir/24.7136,46.6753/21.4858,39.1925 .",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/search/?api=1&query=21.4858,39.1925"
   },
   {
     "input": "https://www.google.com/maps/place/Riyadh/@24.7136,46.6753,12z",
     "valid": true,
+    "normalized": "https://www.google.com/maps/place/Riyadh/@24.7136,46.6753,12z"
+  },
+  {
+    "input": "https://www.google.com/maps/place/Kingdom+Centre/@24.71,46.67,17z/data=!3m1!4b1!4m6!3m5!1s0x0:0x0!8m2!3d24.7113!4d46.6744",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/search/?api=1&query=24.7113,46.6744"
+  },
+  {
+    "input": "https://www.google.com/maps/place/24.7136,46.6753/@24.7,46.6,15z",
+    "valid": true,
     "normalized": "https://www.google.com/maps/search/?api=1&query=24.7136,46.6753"
+  },
+  {
+    "input": "https://www.google.com/maps/place/X/data=!3d95.1!4d46.6",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/place/X/data=!3d95.1!4d46.6"
+  },
+  {
+    "input": "https://www.google.com/maps/search/24.7136,+46.6753",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/search/?api=1&query=24.7136,46.6753"
+  },
+  {
+    "input": "https://www.google.com/maps/search/Kingdom+Centre",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/search/Kingdom+Centre"
+  },
+  {
+    "input": "https://www.google.com/maps/@91,46,10z",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/@91,46,10z"
+  },
+  {
+    "input": "https://maps.google.com/?q=24.7,46.6",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/search/?api=1&query=24.7,46.6"
+  },
+  {
+    "input": "https://maps.google.com/maps?query=Riyadh&q=24.7,46.6",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/search/?api=1&query=24.7,46.6"
   },
   {
     "input": "https://google.com/maps?q=24.7,46.6",
@@ -107,7 +222,7 @@
   {
     "input": "90,180",
     "valid": true,
-    "normalized": "https://www.google.com/maps/search/?api=1&query=90,18"
+    "normalized": "https://www.google.com/maps/search/?api=1&query=90,180"
   },
   {
     "input": "موقعي 24.7136, 46.6753 الآن",
@@ -115,14 +230,94 @@
     "normalized": "https://www.google.com/maps/search/?api=1&query=24.7136,46.6753"
   },
   {
-    "input": "91,46",
+    "input": "-90,-180",
     "valid": true,
-    "normalized": "https://www.google.com/maps/search/?api=1&query=1,46"
+    "normalized": "https://www.google.com/maps/search/?api=1&query=-90,-180"
+  },
+  {
+    "input": "90.000,180.0",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/search/?api=1&query=90.000,180.0"
+  },
+  {
+    "input": "0,0",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/search/?api=1&query=0,0"
+  },
+  {
+    "input": "24.7136 , 46.6753",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/search/?api=1&query=24.7136,46.6753"
+  },
+  {
+    "input": "24.7136, 46.6753",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/search/?api=1&query=24.7136,46.6753"
+  },
+  {
+    "input": "خطأ 95,10 الصحيح 21.4858,39.1925",
+    "valid": true,
+    "normalized": "https://www.google.com/maps/search/?api=1&query=21.4858,39.1925"
+  },
+  {
+    "input": "91,46",
+    "valid": false,
+    "normalized": "91,46"
+  },
+  {
+    "input": "-91,46",
+    "valid": false,
+    "normalized": "-91,46"
+  },
+  {
+    "input": "90.0001,46",
+    "valid": false,
+    "normalized": "90.0001,46"
   },
   {
     "input": "24.7136,181",
+    "valid": false,
+    "normalized": "24.7136,181"
+  },
+  {
+    "input": "24.7136,-180.5",
+    "valid": false,
+    "normalized": "24.7136,-180.5"
+  },
+  {
+    "input": "191,46",
+    "valid": false,
+    "normalized": "191,46"
+  },
+  {
+    "input": "24.7,1812",
+    "valid": false,
+    "normalized": "24.7,1812"
+  },
+  {
+    "input": "1000,10",
+    "valid": false,
+    "normalized": "1000,10"
+  },
+  {
+    "input": "موقعي 91,46 الآن",
+    "valid": false,
+    "normalized": "موقعي 91,46 الآن"
+  },
+  {
+    "input": "24.,46",
+    "valid": false,
+    "normalized": "24.,46"
+  },
+  {
+    "input": "24.7;46.6",
+    "valid": false,
+    "normalized": "24.7;46.6"
+  },
+  {
+    "input": "24.7,46.6,12",
     "valid": true,
-    "normalized": "https://www.google.com/maps/search/?api=1&query=24.7136,18"
+    "normalized": "https://www.google.com/maps/search/?api=1&query=24.7,46.6"
   },
   {
     "input": "",
@@ -146,8 +341,18 @@
   },
   {
     "input": "https://evil.com/?q=google.com/maps",
+    "valid": false,
+    "normalized": "https://evil.com/?q=google.com/maps"
+  },
+  {
+    "input": "https://evil.com/?next=https://maps.app.goo.gl/x",
+    "valid": false,
+    "normalized": "https://evil.com/?next=https://maps.app.goo.gl/x"
+  },
+  {
+    "input": "موقعي:https://maps.app.goo.gl/x",
     "valid": true,
-    "normalized": "https://google.com/maps"
+    "normalized": "https://maps.app.goo.gl/x"
   },
   {
     "input": "https://google.com.evil.com/maps",
@@ -171,8 +376,8 @@
   },
   {
     "input": "ftp://maps.google.com/maps",
-    "valid": true,
-    "normalized": "https://maps.google.com/maps"
+    "valid": false,
+    "normalized": "ftp://maps.google.com/maps"
   },
   {
     "input": "javascript:alert(1)",
@@ -192,7 +397,7 @@
   {
     "input": "https://user@www.google.com/maps/place/x",
     "valid": true,
-    "normalized": "https://www.google.com/maps/place/x"
+    "normalized": "https://user@www.google.com/maps/place/x"
   },
   {
     "input": "https://www.google.com:8443/maps/x",
@@ -201,13 +406,13 @@
   },
   {
     "input": "https://notgoogle.com/maps",
-    "valid": true,
-    "normalized": "https://google.com/maps"
+    "valid": false,
+    "normalized": "https://notgoogle.com/maps"
   },
   {
     "input": "https://mapsgoogle.com/maps",
-    "valid": true,
-    "normalized": "https://google.com/maps"
+    "valid": false,
+    "normalized": "https://mapsgoogle.com/maps"
   },
   {
     "input": "https://www.google.com/travel/flights?q=x",

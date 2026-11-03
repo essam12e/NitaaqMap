@@ -5,6 +5,7 @@ on:
     paths:
       - "android-app/**"
       - "lib/**"
+      - "tests/**"
       - "app/api/**"
       - "app/trip/**"
       - ".github/workflows/android.yml"
