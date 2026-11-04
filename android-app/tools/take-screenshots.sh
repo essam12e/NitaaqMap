@@ -17,7 +17,7 @@ demo battery -e level 100 -e plugged false
 demo network -e wifi show -e level 4 -e mobile show -e datatype none -e level 4
 demo notifications -e visible false
 
-shot() { sleep "${2:-2}"; adb exec-out screencap -p > "shots/$1.png"; echo "saved $1"; }
+shot() { sleep "${2:-2}"; adb exec-out screencap -p > "shots/$1.png"; adb shell uiautomator dump /sdcard/u.xml > /dev/null; adb pull /sdcard/u.xml "shots/$1.xml" > /dev/null; echo "saved $1"; }
 tap() {
   adb shell uiautomator dump /sdcard/ui.xml > /dev/null
   adb pull /sdcard/ui.xml ui.xml > /dev/null
