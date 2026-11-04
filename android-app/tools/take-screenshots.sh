@@ -3,7 +3,7 @@
 set -x
 PKG=com.nitaaq.map
 ACT=$PKG/.MainActivity
-LINK="https://www.google.com/maps/search/?api=1&query=24.7136,46.6753"
+LINK="https://maps.google.com/?q=24.7136,46.6753"
 mkdir -p shots
 adb install -r app/build/outputs/apk/release/app-release.apk
 adb shell settings put global window_animation_scale 0
@@ -11,6 +11,8 @@ adb shell settings put global transition_animation_scale 0
 adb shell settings put global animator_duration_scale 0
 adb shell settings put global sysui_demo_allowed 1
 demo() { adb shell am broadcast -a com.android.systemui.demo -e command "$@" > /dev/null; }
+demo enter
+sleep 2
 demo enter
 demo clock -e hhmm 1041
 demo battery -e level 100 -e plugged false
@@ -39,10 +41,15 @@ for mode in no yes; do
   adb shell cmd uimode night $mode
   adb shell am force-stop $PKG
   adb shell am start -W -n $ACT
+  demo clock -e hhmm 1041
+  demo battery -e level 100 -e plugged false
+  demo notifications -e visible false
   shot "1-home-$name" 4
-  adb shell am start -W -a android.intent.action.SEND -t text/plain \
-    --es android.intent.extra.TEXT "'$LINK'" -n $ACT
-  adb shell input keyevent 111 || true
+  tap "الصق الرابط أو الإحداثيات هنا"
+  sleep 1
+  adb shell input text "'$LINK'"
+  sleep 1
+  adb shell input keyevent 4
   shot "2-link-$name" 3
   tap "إنشاء رمز QR" && shot "3-qr-$name" 6
   if [ $mode = no ]; then
