@@ -9,6 +9,7 @@ on:
       - "app/api/**"
       - "app/trip/**"
       - ".github/workflows/android.yml"
+      - ".github/workflows/android-release.yml"
   push:
     branches: [main]
     paths:
@@ -61,12 +62,32 @@ jobs:
       - name: Lint
         run: ./gradlew --no-configuration-cache :app:lintDebug
 
-      - name: Build debug and release (unsigned) APKs
-        run: ./gradlew --no-configuration-cache :app:assembleDebug :app:assembleRelease
+      # Exercises the real release signing path with a throwaway key generated on the runner.
+      # The resulting release APK can be installed on a phone to test the R8-shrunk build,
+      # but it is NOT the key used for Google Play (see android-release.yml).
+      - name: Throwaway signing key for CI
+        run: |
+          keytool -genkeypair -v -keystore "$RUNNER_TEMP/ci.jks" -alias ci -keyalg RSA -keysize 2048 \
+            -validity 30 -storepass ci-only-pass -keypass ci-only-pass -dname "CN=Nitaaq CI" > /dev/null 2>&1
+          printf 'storeFile=%s\nstorePassword=ci-only-pass\nkeyAlias=ci\nkeyPassword=ci-only-pass\n' "$RUNNER_TEMP/ci.jks" > keystore.properties
+
+      - name: Build debug APK, release APK and release AAB
+        run: >
+          ./gradlew --no-configuration-cache :app:assembleDebug :app:assembleRelease :app:bundleRelease
+          -Pnitaaq.versionCode=2 -Pnitaaq.versionName=0.0.0-ci
+
+      - name: Release outputs are signed with the configured key and versioned
+        run: |
+          rm -f keystore.properties
+          jarsigner -verify app/build/outputs/bundle/release/app-release.aab | grep -q "jar verified"
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          "$BT/apksigner" verify --print-certs app/build/outputs/apk/release/app-release.apk | grep -q "CN=Nitaaq CI"
+          "$BT/aapt2" dump badging app/build/outputs/apk/release/app-release.apk | head -1 | tee /dev/stderr \
+            | grep -q "versionCode='2'"
 
       - name: No server secrets inside the APKs
         run: |
-          for apk in $(find app/build/outputs/apk -name '*.apk'); do
+          for apk in $(find app/build/outputs/apk app/build/outputs/bundle -name '*.apk' -o -name '*.aab'); do
             echo "checking $apk"
             if unzip -p "$apk" | grep -a -E "dev-only-change-this-secret|TRIP_TOKEN_SECRET|BEGIN PRIVATE KEY"; then
               echo "::error::secret-like string found in $apk"; exit 1

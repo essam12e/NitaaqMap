@@ -1,0 +1,136 @@
+name: Android release (Google Play)
+
+# Builds a signed .aab for Google Play (plus a signed .apk to try on a phone first).
+# Run it from the Actions tab ("Run workflow"). Needs these repository secrets:
+#   ANDROID_KEYSTORE_BASE64   base64 of the upload keystore (.jks)
+#   ANDROID_KEYSTORE_PASSWORD keystore password
+#   ANDROID_KEY_ALIAS         key alias inside the keystore
+#   ANDROID_KEY_PASSWORD      key password (often the same as the keystore password)
+# See android-app/PLAY_RELEASE.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: "versionName shown to users (e.g. 1.0.0)"
+        required: true
+        default: "1.0.0"
+      version_code:
+        description: "versionCode (must be higher than the last upload). Empty = 100 + run number"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: android-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check signing secrets
+        env:
+          KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KSP: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KA: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KP: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          missing=""
+          [ -n "$KS" ]  || missing="$missing ANDROID_KEYSTORE_BASE64"
+          [ -n "$KSP" ] || missing="$missing ANDROID_KEYSTORE_PASSWORD"
+          [ -n "$KA" ]  || missing="$missing ANDROID_KEY_ALIAS"
+          [ -n "$KP" ]  || missing="$missing ANDROID_KEY_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:$missing (see android-app/PLAY_RELEASE.md)"; exit 1
+          fi
+
+      - name: Resolve version
+        id: version
+        env:
+          IN_CODE: ${{ inputs.version_code }}
+          IN_NAME: ${{ inputs.version_name }}
+        run: |
+          code="${IN_CODE:-$((100 + GITHUB_RUN_NUMBER))}"
+          case "$code" in (*[!0-9]*|'') echo "::error::version_code must be a number"; exit 1;; esac
+          case "$IN_NAME" in (*[!0-9A-Za-z.\-]*|'') echo "::error::version_name may only contain letters, digits, . and -"; exit 1;; esac
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "name=$IN_NAME" >> "$GITHUB_OUTPUT"
+          echo "Building versionName=$IN_NAME versionCode=$code"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Android SDK (preinstalled on the runner) + platform 36
+        run: |
+          SDKM=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin | sort -V | tail -1)/sdkmanager
+          yes | "$SDKM" --licenses > /dev/null || true
+          "$SDKM" "platforms;android-36" "build-tools;36.0.0" > /dev/null
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: true
+
+      - name: Write keystore (runner only, never uploaded)
+        env:
+          KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KSP: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KA: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KP: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$KS" | base64 -d > "$RUNNER_TEMP/upload.jks"
+          {
+            echo "storeFile=$RUNNER_TEMP/upload.jks"
+            echo "storePassword=$KSP"
+            echo "keyAlias=$KA"
+            echo "keyPassword=$KP"
+          } > keystore.properties
+
+      - name: Unit tests
+        run: ./gradlew --no-configuration-cache :core:test :app:testDebugUnitTest
+
+      - name: Build signed AAB and APK
+        run: >
+          ./gradlew --no-configuration-cache :app:bundleRelease :app:assembleRelease
+          -Pnitaaq.versionCode=${{ steps.version.outputs.code }}
+          -Pnitaaq.versionName=${{ steps.version.outputs.name }}
+
+      - name: Remove keystore
+        if: always()
+        run: rm -f keystore.properties "$RUNNER_TEMP/upload.jks"
+
+      - name: Verify signatures and secrets
+        run: |
+          AAB=app/build/outputs/bundle/release/app-release.aab
+          APK=app/build/outputs/apk/release/app-release.apk
+          test -f "$AAB" && test -f "$APK"
+          jarsigner -verify "$AAB" | grep -q "jar verified" || { echo "::error::AAB is not signed"; exit 1; }
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          "$BT/apksigner" verify --print-certs "$APK" | grep "certificate SHA-256"
+          for f in "$AAB" "$APK"; do
+            if unzip -p "$f" | grep -a -E "dev-only-change-this-secret|TRIP_TOKEN_SECRET|BEGIN PRIVATE KEY"; then
+              echo "::error::secret-like string found in $f"; exit 1
+            fi
+          done
+          mkdir -p ../dist
+          cp "$AAB" "../dist/nitaaq-map-${{ steps.version.outputs.name }}-${{ steps.version.outputs.code }}.aab"
+          cp "$APK" "../dist/nitaaq-map-${{ steps.version.outputs.name }}-${{ steps.version.outputs.code }}.apk"
+          cp app/build/outputs/mapping/release/mapping.txt ../dist/mapping.txt
+
+      - name: Upload release files
+        uses: actions/upload-artifact@v4
+        with:
+          name: nitaaq-map-play-${{ steps.version.outputs.name }}-${{ steps.version.outputs.code }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30

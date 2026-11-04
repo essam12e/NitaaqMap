@@ -24,8 +24,9 @@ android {
         applicationId = "com.nitaaq.map"
         minSdk = 29 // Android 10: MediaStore saving without any storage permission.
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        // Every Play upload needs a higher versionCode. The release workflow passes -Pnitaaq.versionCode.
+        versionCode = prop("nitaaq.versionCode", "1").toInt()
+        versionName = prop("nitaaq.versionName", "1.0.0")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

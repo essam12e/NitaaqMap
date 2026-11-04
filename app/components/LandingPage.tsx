@@ -1188,6 +1188,9 @@ export function LandingPage() {
             <p className="mt-4 text-lg font-bold text-slate-300">
               رحلة آمنة، وخصوصيتك محفوظة.
             </p>
+            <a href="/privacy" className="mt-2 inline-block text-sm font-bold text-slate-400 underline transition hover:text-emerald-300">
+              سياسة الخصوصية
+            </a>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <a
@@ -1458,6 +1461,11 @@ function IntroLanding({
           </div>
         </section>
       )}
+      <div className="relative z-10 pb-8 text-center">
+        <a href="/privacy" className="text-sm font-bold text-slate-400 underline transition hover:text-emerald-300">
+          سياسة الخصوصية
+        </a>
+      </div>
     </main>
   );
 }
